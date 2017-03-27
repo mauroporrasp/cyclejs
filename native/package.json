@@ -9,13 +9,11 @@
     "type": "git",
     "url": "https://github.com/cyclejs/cycle-react-native"
   },
-  "peerDependencies": {
-    "rx": ">=3",
-    "react-native": "~0.24.0"
+  "dependencies": {
+    "react-native": "0.42.3",
+    "rx": ">=3"
   },
   "devDependencies": {
-    "rx": ">=3",
-    "react-native": "~0.24.0",
     "babel": "5.8.x",
     "eslint": "1.0.x",
     "eslint-config-cycle": "3.0.x",

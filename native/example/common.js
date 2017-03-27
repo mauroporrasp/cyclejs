@@ -1,6 +1,7 @@
 import {run} from '@cycle/core';
 import {Rx} from 'rx';
-import React from 'react-native';
+import React from 'react';
+import ReactNative from 'react-native';
 import makeReactNativeDriver, {getBackHandler} from '@cycle/react-native/src/driver';
 import Touchable from '@cycle/react-native/src/Touchable';
 import ListView from '@cycle/react-native/src/ListView';
@@ -31,7 +32,7 @@ const {
   ScrollView,
   Image,
   AlertIOS
-} = React;
+} = ReactNative;
 const windowWidth = Dimensions.get('window').width;
 
 
@@ -115,7 +116,7 @@ function model({increment, starsResponse, eventsResponse, chilicornState, goToSe
     key: 'MainNavigation',
     index: 0,
     title: 'Cycle Native',
-    children: [
+    routes: [
       {key: 'Counter'}
     ]
   };
@@ -165,7 +166,7 @@ function renderCard(vdom, navigationProps) {
   return (
     <NavigationExperimental.Card
       {...navigationProps}
-      key={'View:' + navigationProps.scene.navigationState.key}
+      key={'View:' + navigationProps.scene.key}
       renderScene={() => vdom}
       onNavigate={onNavigateBack}
     />
@@ -184,12 +185,12 @@ function renderButton(selector, text) {
 
 function view(model) {
   return (
-    <NavigationExperimental.AnimatedView
+    <NavigationExperimental.CardStack
       style={{flex: 1}}
       navigationState={model.navigationState}
       onNavigate={onNavigateBack}
       renderScene={(navigationProps) => {
-        const key = navigationProps.scene.navigationState.key;
+        const key = navigationProps.scene.key.split('scene_')[1];
         console.log('navigationProps', navigationProps);
         switch (key) {
           case 'Counter':
@@ -221,7 +222,7 @@ function CounterView({counter, starsResponse, eventsResponse}) {
     <ScrollView style={styles.container}>
       <Image style={styles.image} source={require("./img/logo.png")} />
       <Text style={styles.header}>RNCycle</Text>
-      <Text style={styles.stars}>	★{starsResponse.stargazers_count}</Text>
+      <Text style={styles.stars}>  ★{starsResponse.stargazers_count}</Text>
 
       {renderButton('button', counter)}
 

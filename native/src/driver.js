@@ -32,7 +32,9 @@ export function findHandler(evType, selector) {
   if (evType === BACK_ACTION && !selector) {
     return handlers[BACK_ACTION];
   }
-
+  if (!handlers[selector]) {
+    return registerHandler(selector, evType).send;
+  }
   if (handlers[selector].hasOwnProperty(evType)) {
     return handlers[selector][evType].send
   }
