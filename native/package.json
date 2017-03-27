@@ -25,8 +25,9 @@
   },
   "scripts": {
     "eslint": "eslint src/",
-    "test": "npm run eslint",
-    "test-ci": "npm run eslint",
+    "jest": "node ./node_modules/bin/jest.js",
+    "test": "npm run eslint && npm run jest",
+    "test-ci": "npm run eslint && npm run jest",
     "precompile-lib": "rm -rf lib/ && mkdir -p lib",
     "compile-lib": "babel -d lib/ src/",
     "docs": "node ./scripts/make-api-docs.js",

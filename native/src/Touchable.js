@@ -25,7 +25,7 @@ function createTouchableClass(className) {
       this._touchable.setNativeProps(props);
     },
     render() {
-      const TouchableClass = React[className];
+      const TouchableClass = ReactNative[className];
       const {selector, ...props} = this.props;
 
       // find all defined touch handlers
