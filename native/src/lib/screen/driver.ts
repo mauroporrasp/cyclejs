@@ -1,6 +1,7 @@
 import * as React from 'react';
 import xs, {Stream} from 'xstream';
 import {AppRegistry, View} from 'react-native';
+import {adapt} from '@cycle/run/lib/adapt';
 
 const BACK_ACTION = '@@back';
 const backHandler = xs.create();
@@ -66,9 +67,9 @@ export function makeScreenDriver(appKey: string) {
     const response = {
       select(selector: string) {
         return {
-          observable: xs.empty(),
+          observable: adapt(xs.empty()),
           events: function events(evType: string) {
-            return registerHandler(selector, evType);
+            return adapt(registerHandler(selector, evType));
           },
         };
       },
