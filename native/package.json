@@ -1,43 +1,69 @@
 {
-  "name": "@cycle/react-native",
+  "name": "@cycle/native",
   "version": "1.0.0-experimental.15",
   "description": "A Cycle.js Driver for interacting with React Native",
-  "main": "lib/index.js",
   "author": "Andre Staltz",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cyclejs/cycle-react-native"
-  },
+  "homepage": "https://cycle.js.org",
+  "bugs": "https://github.com/cyclejs/cyclejs/issues",
+  "repository": "https://github.com/cyclejs/cyclejs/tree/master/html",
+  "keywords": [
+    "reactive",
+    "framework",
+    "xstream",
+    "functional",
+    "unidirectional",
+    "mvi",
+    "react-native",
+    "driver"
+  ],
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "types": "lib/index.d.ts",
   "dependencies": {
-    "@cycle/run": "^3.1.0",
-    "babel-cli": "^6.24.0",
-    "enzyme": "^2.8.0",
+    "@cycle/run": "*",
     "react": "^15.4.2",
-    "react-native": "0.42.3",
-    "xstream": "^10.3.0"
+    "react-native": "0.42.3"
+  },
+  "peerDependencies": {
+    "xstream": "*"
   },
   "devDependencies": {
+    "@cycle/run": "^3.1.0",
+    "@types/enzyme": "^2.7.6",
+    "@types/mocha": "^2.2.40",
+    "@types/react": "^15.0.20",
+    "@types/react-native": "^0.42.12",
+    "babel-cli": "^6.24.0",
     "babel-preset-react-native": "^1.9.1",
+    "enzyme": "^2.8.0",
     "eslint": "1.0.x",
     "eslint-config-cycle": "3.0.x",
     "eslint-plugin-cycle": "1.0.x",
     "eslint-plugin-no-class": "0.1.x",
     "markdox": "0.1.9",
     "react-native-mock": "^0.3.1",
-    "react-test-renderer": "^15.4.2"
+    "react-test-renderer": "^15.4.2",
+    "xstream": "^10.3.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
-    "eslint": "eslint src/",
-    "test": "../node_modules/.bin/mocha test/*.js --require react-native-mock/mock.js",
+    "lint": "../node_modules/.bin/tslint --config ../tslint.json --project tsconfig.json",
+    "prelib": "rm -rf lib/ && mkdir -p lib",
+    "lib": "../node_modules/.bin/tsc",
+    "mocha": "../node_modules/.bin/mocha test/*.ts --require react-native-mock/mock.js --require ts-node/register --recursive",
+    "test": "yarn run lint && yarn run lib && yarn run mocha",
     "test-ci": "npm run test",
-    "precompile-lib": "rm -rf lib/ && mkdir -p lib",
-    "compile-lib": "babel -d lib/ src/",
-    "docs": "node ./scripts/make-api-docs.js",
-    "prepublish": "npm run compile-lib",
-    "release": "npm run release-patch",
-    "release-patch": "git checkout master && npm version patch && git push origin master --tags && npm publish --access=public",
-    "release-minor": "git checkout master && npm version minor && git push origin master --tags && npm publish --access=public",
-    "release-major": "git checkout master && npm version major && git push origin master --tags && npm publish --access=public"
+    "dist": ":",
+    "docs": "node ../.scripts/make-api-docs.js ${PWD##*/}",
+    "preversion": "yarn test",
+    "version": "yarn run docs && yarn run changelog",
+    "postversion": "git add -A && git commit -m \"release(${PWD##*/}): v$(cat package.json | ../node_modules/.bin/jase version)\" && git push origin master && yarn publish",
+    "release-patch": "false",
+    "release-minor": "npm --no-git-tag-version version minor",
+    "release-major": "npm --no-git-tag-version version major",
+    "changelog": "node ../.scripts/update-changelogs.js ${PWD##*/}"
   }
 }

@@ -2,11 +2,36 @@
 # yarn lockfile v1
 
 
-"@cycle/run@^3.1.0":
+"@cycle/run@*":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@cycle/run/-/run-3.1.0.tgz#76df582a501d2d1b871f8f6decf263afae090384"
   dependencies:
     xstream "10.x"
+
+"@types/cheerio@*":
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/@types/cheerio/-/cheerio-0.22.1.tgz#740c4cd8c4d3f3074f83b9ab62e711eac2c764ce"
+
+"@types/enzyme@^2.7.6":
+  version "2.7.6"
+  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-2.7.6.tgz#b210dd68e0009a916a7f02f2d168cde1f85d35b9"
+  dependencies:
+    "@types/cheerio" "*"
+    "@types/react" "*"
+
+"@types/mocha@^2.2.40":
+  version "2.2.40"
+  resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.40.tgz#9811dd800ece544cd84b5b859917bf584a150c4c"
+
+"@types/react-native@^0.42.12":
+  version "0.42.12"
+  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.42.12.tgz#1b07913e9398fd73dfa5c2544e6717fe772dd3bf"
+  dependencies:
+    "@types/react" "*"
+
+"@types/react@*", "@types/react@^15.0.20":
+  version "15.0.20"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-15.0.20.tgz#3d4a05ed04a8b1847ac6c8fa6093591d3910fba5"
 
 abbrev@1:
   version "1.1.0"
