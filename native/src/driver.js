@@ -1,19 +1,19 @@
 import React from 'react'
-import Rx from 'rx'
+import xs from 'xstream'
 import ReactNative from 'react-native';
 const {AppRegistry, View} = ReactNative;
 
 const BACK_ACTION = '@@back';
-const backHandler = new Rx.Subject
+const backHandler = xs.create();
 
 let handlers = {
   [BACK_ACTION]: createHandler()
 };
 
 function createHandler() {
-  const handler = new Rx.Subject();
-  handler.send = function sendIntoSubject(...args) {
-    handler.onNext(...args)
+  const handler = xs.create();
+  handler.send = function sendIntoSubject(x) {
+    handler.shamefullySendNext(x)
   }
   return handler;
 }
@@ -65,7 +65,7 @@ function makeReactNativeDriver(appKey) {
     let response = {
       select(selector) {
         return {
-          observable: Rx.Observable.empty(),
+          observable: xs.empty(),
           events: function events(evType) {
             return registerHandler(selector, evType);
           },

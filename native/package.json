@@ -10,22 +10,27 @@
     "url": "https://github.com/cyclejs/cycle-react-native"
   },
   "dependencies": {
+    "@cycle/run": "^3.1.0",
+    "babel-cli": "^6.24.0",
+    "enzyme": "^2.8.0",
+    "react": "^15.4.2",
     "react-native": "0.42.3",
-    "rx": ">=3"
+    "xstream": "^10.3.0"
   },
   "devDependencies": {
-    "babel": "5.8.x",
+    "babel-preset-react-native": "^1.9.1",
     "eslint": "1.0.x",
     "eslint-config-cycle": "3.0.x",
     "eslint-plugin-cycle": "1.0.x",
     "eslint-plugin-no-class": "0.1.x",
-    "markdox": "0.1.9"
+    "markdox": "0.1.9",
+    "react-native-mock": "^0.3.1",
+    "react-test-renderer": "^15.4.2"
   },
   "scripts": {
     "eslint": "eslint src/",
-    "jest": "node ./node_modules/bin/jest.js",
-    "test": "npm run eslint && npm run jest",
-    "test-ci": "npm run eslint && npm run jest",
+    "test": "../node_modules/.bin/mocha test/*.js --require react-native-mock/mock.js",
+    "test-ci": "npm run test",
     "precompile-lib": "rm -rf lib/ && mkdir -p lib",
     "compile-lib": "babel -d lib/ src/",
     "docs": "node ./scripts/make-api-docs.js",
