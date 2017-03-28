@@ -9,7 +9,13 @@ node_modules
 
 # Generated
 test/browser/page/tests-bundle.js
-lib/
+/lib/
+index.d.ts
+index.js
+index.js.map
+screen.d.ts
+screen.js
+screen.js.map
 
 # Secrets
 .zuulrc

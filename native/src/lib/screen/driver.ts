@@ -5,7 +5,7 @@ import {AppRegistry, View} from 'react-native';
 const BACK_ACTION = '@@back';
 const backHandler = xs.create();
 
-const handlers = {
+const handlers: any = {
   [BACK_ACTION]: createHandler(),
 };
 
@@ -43,7 +43,7 @@ function isChildReactElement(child: any) {
   return !!child && typeof child === `object` && child._isReactElement;
 }
 
-export function makeReactNativeDriver(appKey: string) {
+export function makeScreenDriver(appKey: string) {
   return function reactNativeDriver(vdom$: Stream<React.ReactElement<any>>) {
     function componentFactory() {
       return React.createClass<any, {vdom: React.ReactElement<any>}>({

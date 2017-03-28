@@ -4,17 +4,15 @@ import xs from 'xstream';
 import * as ReactNative from 'react-native';
 import {setup} from '@cycle/run';
 import {
-  makeReactNativeDriver,
+  makeScreenDriver,
   TouchableHighlight as TH,
   TouchableNativeFeedback as TNF,
   TouchableOpacity as TO,
   TouchableWithoutFeedback as TWF,
   ListView as LV,
-} from '../lib/index';
+} from '../screen';
 import {shallow} from 'enzyme';
 const assert = require('assert');
-// const Enzyme = require('enzyme');
-// const shallow = Enzyme.shallow;
 const ListView = React.createFactory(LV);
 const TouchableOpacity = React.createFactory(TO);
 const TouchableWithoutFeedback = React.createFactory(TWF);
@@ -23,24 +21,24 @@ const TouchableNativeFeedback = React.createFactory(TNF);
 const View = React.createFactory(ReactNative.View);
 const Text = React.createFactory(ReactNative.Text);
 
-describe('RN driver', function () {
+describe('Screen driver', function () {
   describe('with TouchableOpacity', function () {
     it('should allow using source . select . events', function (done) {
       function main(sources: any) {
-        const inc$ = sources.RN.select('button').events('press');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           TouchableOpacity({selector: 'button'},
             Text({}, '' + i),
           ),
         );
-        return {RN: vdom$};
+        return {Screen: vdom$};
       }
 
-      const {sinks, run} = setup(main, { RN: makeReactNativeDriver('example')});
+      const {sinks, run} = setup(main, {Screen: makeScreenDriver('example')});
 
       let turn = 0;
-      sinks.RN.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
+      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
         const wrapper = shallow(vdom);
         assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
         setTimeout(() => wrapper.simulate('press'));
@@ -57,20 +55,20 @@ describe('RN driver', function () {
   describe('with TouchableNativeFeedback', function () {
     it('should allow using source . select . events', function (done) {
       function main(sources: any) {
-        const inc$ = sources.RN.select('button').events('press');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           TouchableNativeFeedback({selector: 'button'},
             Text({}, '' + i),
           ),
         );
-        return {RN: vdom$};
+        return {Screen: vdom$};
       }
 
-      const {sinks, run} = setup(main, { RN: makeReactNativeDriver('example')});
+      const {sinks, run} = setup(main, { Screen: makeScreenDriver('example')});
 
       let turn = 0;
-      sinks.RN.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
+      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
         const wrapper = shallow(vdom);
         assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
         setTimeout(() => wrapper.simulate('press'));
@@ -87,20 +85,20 @@ describe('RN driver', function () {
   describe('with TouchableHighlight', function () {
     it('should allow using source . select . events', function (done) {
       function main(sources: any) {
-        const inc$ = sources.RN.select('button').events('press');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           TouchableHighlight({selector: 'button'},
             Text({}, '' + i),
           ),
         );
-        return {RN: vdom$};
+        return {Screen: vdom$};
       }
 
-      const {sinks, run} = setup(main, { RN: makeReactNativeDriver('example')});
+      const {sinks, run} = setup(main, { Screen: makeScreenDriver('example')});
 
       let turn = 0;
-      sinks.RN.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
+      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
         const wrapper = shallow(vdom);
         assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
         setTimeout(() => wrapper.simulate('press'));
@@ -117,20 +115,20 @@ describe('RN driver', function () {
   describe('with TouchableWithoutFeedback', function () {
     it('should allow using source . select . events', function (done) {
       function main(sources: any) {
-        const inc$ = sources.RN.select('button').events('press');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           TouchableWithoutFeedback({selector: 'button'},
             Text({}, '' + i),
           ),
         );
-        return {RN: vdom$};
+        return {Screen: vdom$};
       }
 
-      const {sinks, run} = setup(main, { RN: makeReactNativeDriver('example')});
+      const {sinks, run} = setup(main, { Screen: makeScreenDriver('example')});
 
       let turn = 0;
-      sinks.RN.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
+      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
         const wrapper = shallow(vdom);
         assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
         setTimeout(() => wrapper.simulate('press'));
@@ -160,12 +158,12 @@ describe('RN driver', function () {
             ),
           }),
         );
-        return {RN: vdom$};
+        return {Screen: vdom$};
       }
 
-      const {sinks, run} = setup(main, { RN: makeReactNativeDriver('example')});
+      const {sinks, run} = setup(main, { Screen: makeScreenDriver('example')});
 
-      const endlessSink$ = xs.merge(sinks.RN, xs.never());
+      const endlessSink$ = xs.merge(sinks.Screen, xs.never());
       endlessSink$.take(1).addListener({next: vdom => {
         const wrapper = shallow(vdom);
         const dataBlob = wrapper.instance().state.dataSource._dataBlob;
