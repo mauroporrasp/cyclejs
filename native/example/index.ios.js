@@ -1,5 +1,5 @@
-import {run} from '@cycle/core';
-import makeReactNativeDriver from '@cycle/react-native/lib/driver';
+import {run} from '@cycle/run';
+import {makeReactNativeDriver} from '@cycle/native';
 import {makeHTTPDriver} from '@cycle/http';
 import {main} from './common'
 

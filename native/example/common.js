@@ -1,14 +1,28 @@
-import {run} from '@cycle/core';
-import {Rx} from 'rx';
+import xs from 'xstream';
+import dropRepeats from 'xstream/extra/dropRepeats';
 import React from 'react';
 import ReactNative from 'react-native';
-import makeReactNativeDriver, {getBackHandler} from '@cycle/react-native/src/driver';
-import Touchable from '@cycle/react-native/src/Touchable';
-import ListView from '@cycle/react-native/src/ListView';
-import CycleAnimated from '@cycle/react-native/src/Animated';
+import {
+  getBackHandler,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  ListView,
+  Image as AnimatedImage
+} from '@cycle/native';
 import {makeHTTPDriver} from '@cycle/http';
 import NavigationStateUtils from 'NavigationStateUtils';
 import styles from './styles';
+const {
+  Animated,
+  Dimensions,
+  NavigationExperimental,
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Image,
+  AlertIOS
+} = ReactNative;
 
 const REPO_URL = 'https://api.github.com/repos/cyclejs/cycle-react-native';
 const COLL_URL = 'https://api.github.com/repos/cyclejs/cycle-react-native/events';
@@ -22,29 +36,12 @@ const onNavigateBack = action => {
   }
 }
 
-const {
-  Animated,
-  Dimensions,
-  NavigationExperimental,
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  Image,
-  AlertIOS
-} = ReactNative;
 const windowWidth = Dimensions.get('window').width;
 
-
-const {
-  TouchableOpacity,
-  TouchableWithoutFeedback
-} = Touchable;
-
 export function main({RN, HTTP}) {
-  let requestStars$ = Rx.Observable.just({url: REPO_URL});
-  let requestEvents$ = Rx.Observable.just({url: COLL_URL});
-  let request$ = Rx.Observable.merge(requestStars$, requestEvents$);
+  let requestStars$ = xs.of({url: REPO_URL, category: 'stars'});
+  let requestEvents$ = xs.of({url: COLL_URL, category: 'events'});
+  let request$ = xs.merge(requestStars$, requestEvents$);
   return {
     RN: model(intent(RN, HTTP)).map(view),
     HTTP: request$
@@ -53,14 +50,14 @@ export function main({RN, HTTP}) {
 
 function intent(RN, HTTP) {
   let starsResponse$ = HTTP
-    .filter(res$ => res$.request.url === REPO_URL)
-    .mergeAll()
+    .select('stars')
+    .flatten()
     .map(res => res.body);
 
-    let eventsResponse$ = HTTP
-      .filter(res$ => res$.request.url === COLL_URL)
-      .mergeAll()
-      .map(res => res.body);
+  let eventsResponse$ = HTTP
+    .select('events')
+    .flatten()
+    .map(res => res.body);
 
   return {
     increment: RN
@@ -75,8 +72,7 @@ function intent(RN, HTTP) {
     chilicornState: RN
       .select('chilicorn')
       .events('press')
-      .startWith(0)
-      .scan(acc => acc ? 0 : 1),
+      .fold(acc => acc ? 0 : 1, 0),
 
     goToSecondView: RN
       .select('listitem')
@@ -98,10 +94,12 @@ function intent(RN, HTTP) {
     goToCreditsView: RN
       .select('credits')
       .events('press')
-      .map(profile => ({
+      .map(profile => {
+        debugger;
+        return ({
         type: 'push',
         key: 'Credits'
-      })),
+      })}),
 
     back: RN
       .navigateBack()
@@ -122,36 +120,33 @@ function model({increment, starsResponse, eventsResponse, chilicornState, goToSe
   };
 
   const counter = increment
-    .startWith(0)
-    .scan((state, n) => state + n);
-
+    .fold((state, n) => state + n, 0);
 
   const selectedProfile = goToSecondView
     .startWith({data: {}})
     .map(({data}) => data);
 
-  const navigationState = Rx.Observable.merge(
+  const navigationState = xs.merge(
     goToSecondView,
     goToThirdView,
     goToCreditsView,
     back
   )
-    .distinctUntilChanged(navigationState => navigationState, (a, b) => {
+    .compose(dropRepeats((a, b) => {
+      debugger;
       if (a.type === `back` && b.type === `back`) {
         return false
       }
-
       return a.key === b.key
-    })
-    .startWith(initialNavigationState)
-    .scan((prevState, action) => {
+    }))
+    .fold((prevState, action) => {
       return action.type === 'back'
         ? NavigationStateUtils.pop(prevState)
         : NavigationStateUtils.push(prevState, action)
-    })
+    }, initialNavigationState)
 
-  return Rx.Observable.combineLatest(counter, chilicornState, starsResponse, eventsResponse, navigationState, selectedProfile,
-    (counter, chilicornState, starsResponse, eventsResponse, navigationState, selectedProfile) => ({
+  return xs.combine(counter, chilicornState, starsResponse, eventsResponse, navigationState, selectedProfile)
+    .map(([counter, chilicornState, starsResponse, eventsResponse, navigationState, selectedProfile]) => ({
       counter,
       chilicornState,
       starsResponse,
@@ -159,7 +154,6 @@ function model({increment, starsResponse, eventsResponse, chilicornState, goToSe
       navigationState,
       selectedProfile
     }));
-
 }
 
 function renderCard(vdom, navigationProps) {
@@ -294,7 +288,7 @@ function CreditsView({chilicornState}) {
   return (
     <ScrollView style={styles.container}>
       <TouchableWithoutFeedback selector='chilicorn' payload='true'>
-        <CycleAnimated.Image
+        <AnimatedImage
           animation={Animated.timing}
           initialValue={0}
           value={chilicornState}
@@ -324,7 +318,7 @@ function CreditsView({chilicornState}) {
             uri: CHILICORN_URL
           }}
         >
-        </CycleAnimated.Image>
+        </AnimatedImage>
       </TouchableWithoutFeedback>
 
       <View style={styles.creditsList}>
