@@ -16,6 +16,9 @@ index.js.map
 screen.d.ts
 screen.js
 screen.js.map
+toast.d.ts
+toast.js
+toast.js.map
 
 # Secrets
 .zuulrc

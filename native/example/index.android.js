@@ -1,9 +1,11 @@
 import {run} from '@cycle/run';
-import {makeReactNativeDriver} from '@cycle/native';
+import {makeScreenDriver} from '@cycle/native/screen';
+import {makeToastDriver} from '@cycle/native/toast';
 import {makeHTTPDriver} from '@cycle/http';
 import {main} from './common'
 
 run(main, {
-  RN: makeReactNativeDriver('example'),
+  Screen: makeScreenDriver('example'),
+  Toast: makeToastDriver(),
   HTTP: makeHTTPDriver()
 });

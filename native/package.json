@@ -32,6 +32,7 @@
     "@cycle/run": "^3.1.0",
     "@types/enzyme": "^2.7.6",
     "@types/mocha": "^2.2.40",
+    "@types/sinon": "^1.16.36",
     "@types/react": "^15.0.20",
     "@types/react-native": "^0.42.12",
     "babel-cli": "^6.24.0",
@@ -44,6 +45,7 @@
     "markdox": "0.1.9",
     "react-native-mock": "^0.3.1",
     "react-test-renderer": "^15.4.2",
+    "sinon": "^2.1.0",
     "xstream": "^10.3.0"
   },
   "publishConfig": {

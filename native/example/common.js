@@ -7,9 +7,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   ListView,
-  Image as AnimatedImage
-} from '@cycle/native';
-import {makeHTTPDriver} from '@cycle/http';
+  Image as AnimatedImage,
+} from '@cycle/native/screen';
 import NavigationStateUtils from 'NavigationStateUtils';
 import styles from './styles';
 const {
@@ -38,17 +37,20 @@ const onNavigateBack = action => {
 
 const windowWidth = Dimensions.get('window').width;
 
-export function main({RN, HTTP}) {
+export function main({Screen, HTTP}) {
   let requestStars$ = xs.of({url: REPO_URL, category: 'stars'});
   let requestEvents$ = xs.of({url: COLL_URL, category: 'events'});
   let request$ = xs.merge(requestStars$, requestEvents$);
+  let toast$ = xs.periodic(2000).take(1)
+    .mapTo({message: 'Hello world!', type: 'show', duration: 1000});
   return {
-    RN: model(intent(RN, HTTP)).map(view),
-    HTTP: request$
+    Screen: model(intent(Screen, HTTP)).map(view),
+    Toast: toast$,
+    HTTP: request$,
   };
 }
 
-function intent(RN, HTTP) {
+function intent(Screen, HTTP) {
   let starsResponse$ = HTTP
     .select('stars')
     .flatten()
@@ -60,7 +62,7 @@ function intent(RN, HTTP) {
     .map(res => res.body);
 
   return {
-    increment: RN
+    increment: Screen
       .select('button')
       .events('press')
       .map(ev => +1),
@@ -69,12 +71,12 @@ function intent(RN, HTTP) {
 
     eventsResponse: eventsResponse$,
 
-    chilicornState: RN
+    chilicornState: Screen
       .select('chilicorn')
       .events('press')
       .fold(acc => acc ? 0 : 1, 0),
 
-    goToSecondView: RN
+    goToSecondView: Screen
       .select('listitem')
       .events('press')
       .map(profile => ({
@@ -83,7 +85,7 @@ function intent(RN, HTTP) {
         data: profile
       })),
 
-    goToThirdView: RN
+    goToThirdView: Screen
       .select('fractal')
       .events('press')
       .map(profile => ({
@@ -91,7 +93,7 @@ function intent(RN, HTTP) {
         key: 'Fractal'
       })),
 
-    goToCreditsView: RN
+    goToCreditsView: Screen
       .select('credits')
       .events('press')
       .map(profile => {
@@ -101,7 +103,7 @@ function intent(RN, HTTP) {
         key: 'Credits'
       })}),
 
-    back: RN
+    back: Screen
       .navigateBack()
       .map({type: 'back'})
   }
