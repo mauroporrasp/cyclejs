@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {findHandler} from './driver';
+import {findHandler} from './handlers';
 import * as ReactNative from 'react-native';
 const View = ReactNative.View;
 

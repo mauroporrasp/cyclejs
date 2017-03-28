@@ -12,7 +12,8 @@
  * @function makeScreenDriver
  */
 export {makeScreenDriver} from './lib/screen/driver';
-export {getBackHandler} from './lib/screen/driver';
+export {ScreenSource} from './lib/screen/ScreenSource';
+export {getBackHandler} from './lib/screen/handlers';
 export {Image, Text, View} from './lib/screen/Animated';
 export {ListView} from './lib/screen/ListView';
 export {

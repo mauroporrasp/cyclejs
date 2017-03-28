@@ -10,6 +10,7 @@ import {
   TouchableOpacity as TO,
   TouchableWithoutFeedback as TWF,
   ListView as LV,
+  ScreenSource,
 } from '../screen';
 import {shallow} from 'enzyme';
 const assert = require('assert');
@@ -24,7 +25,7 @@ const Text = React.createFactory(ReactNative.Text);
 describe('Screen driver', function () {
   describe('with TouchableOpacity', function () {
     it('should allow using source . select . events', function (done) {
-      function main(sources: any) {
+      function main(sources: {Screen: ScreenSource}) {
         const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
