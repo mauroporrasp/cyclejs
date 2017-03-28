@@ -12,6 +12,7 @@
  * @function makeReactNativeDriver
  */
 export {makeReactNativeDriver} from './driver';
+export {getBackHandler} from './driver';
 export {Image, Text, View} from './Animated';
 export {ListView} from './ListView';
 export {
