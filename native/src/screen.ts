@@ -13,12 +13,6 @@
  */
 export {makeScreenDriver} from './lib/screen/driver';
 export {ScreenSource} from './lib/screen/ScreenSource';
-export {getBackHandler} from './lib/screen/handlers';
+export {h} from './lib/screen/h';
 export {Image, Text, View} from './lib/screen/Animated';
 export {ListView} from './lib/screen/ListView';
-export {
-  TouchableHighlight,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  TouchableNativeFeedback,
-} from './lib/screen/Touchable';
