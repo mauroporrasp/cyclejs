@@ -30,7 +30,8 @@ export function makeToastDriver() {
     if (Platform.OS === 'android') {
       sink.addListener({
         next: t => {
-          const args = [t.message, t.duration, (t as GravityToast).gravity];
+          const args = [t.message, t.duration, (t as GravityToast).gravity]
+            .filter(x => typeof x !== 'undefined');
           (ToastAndroid[t.type] as any)(...args);
         },
       });

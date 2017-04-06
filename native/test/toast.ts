@@ -2,17 +2,34 @@ import 'mocha';
 import * as React from 'react';
 import xs from 'xstream';
 import * as ReactNative from 'react-native';
-import {setup} from '@cycle/run';
-import {makeToastDriver, Duration} from '../toast';
+import {setup, run} from '@cycle/run';
 import * as sinon from 'sinon';
-const ToastAndroid = ReactNative.ToastAndroid;
 const assert = require('assert');
 
-/**
- * react-native-mock does not yet mock ToastAndroid so we cannot yet
- * test this driver.
- */
-describe.skip('Toast driver', function () {
+// Mock this ourselves, since it's lacking in `react-native-mock`
+const ToastAndroid = (ReactNative as any).ToastAndroid = {
+  show(message: string, duration: number) {
+  },
+  showWithGravity(message: string, duration: number, gravity: number) {
+  },
+  SHORT: 1,
+  LONG: 2,
+  TOP: 3,
+  BOTTOM: 4,
+  CENTER: 5,
+};
+
+// Must import this after the mock
+const {makeToastDriver, Duration} = require('../toast');
+
+let previousPlatformOS: any;
+
+describe('Toast driver', function () {
+  before(function () {
+    previousPlatformOS = ReactNative.Platform.OS;
+    ReactNative.Platform.OS = 'android';
+  });
+
   it('should allow showing a toast', function (done) {
     const sandbox = sinon.sandbox.create();
     sandbox.stub(ToastAndroid, 'show');
@@ -27,7 +44,7 @@ describe.skip('Toast driver', function () {
       return {Toast: toast$};
     }
 
-    const {run} = setup(main, {Toast: makeToastDriver()});
+    run(main, {Toast: makeToastDriver()});
 
     setTimeout(() => {
       sinon.assert.calledOnce(ToastAndroid.show as any);
@@ -35,6 +52,10 @@ describe.skip('Toast driver', function () {
         'This is toast #1', ToastAndroid.SHORT,
       );
       done();
-    }, 500);
+    }, 400);
+  });
+
+  after(function () {
+    ReactNative.Platform.OS = previousPlatformOS;
   });
 });
