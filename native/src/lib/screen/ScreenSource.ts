@@ -1,35 +1,23 @@
 import xs, {Stream, Listener} from 'xstream';
 import {adapt} from '@cycle/run/lib/adapt';
-import {getHandlerSubject, SHAMEFUL_SELECTOR} from './handlers';
+import {getHandler} from './handlers';
 
 export class ScreenSource {
-  private key: string;
-  private topLevelEvent$: Stream<any>;
+  private selector: string | null;
 
-  constructor(topLevelEvent$: Stream<any>,
-              key: string = SHAMEFUL_SELECTOR) {
-    this.topLevelEvent$ = topLevelEvent$;
-    this.key = key;
+  constructor(selector: (string | null) = null) {
+    this.selector = selector;
   }
 
-  public select(key: string): ScreenSource {
-    return new ScreenSource(this.topLevelEvent$, key);
+  public select(selector: string): ScreenSource {
+    return new ScreenSource(selector);
   }
 
   public events(eventType: string): Stream<any> {
-    if (this.key === SHAMEFUL_SELECTOR || !this.topLevelEvent$) {
-      return adapt(getHandlerSubject(this.key, eventType));
+    if (this.selector === null) {
+      return adapt(xs.empty());
     } else {
-      return adapt(
-        this.topLevelEvent$.filter(ev =>
-          ev.type === eventType &&
-          ev.inst &&
-          ev.inst._currentElement &&
-          ev.inst._currentElement._owner &&
-          ev.inst._currentElement._owner._currentElement &&
-          ev.inst._currentElement._owner._currentElement.key === this.key,
-        ),
-      );
+      return adapt(getHandler(this.selector, eventType));
     }
   }
 }

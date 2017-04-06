@@ -3,7 +3,7 @@ import xs, {Stream, Listener} from 'xstream';
 import {AppRegistry, View} from 'react-native';
 import {ScreenSource} from './ScreenSource';
 
-export function makeScreenDriver(appKey: string, RNEventEmitter: any) {
+export function makeScreenDriver(appKey: string) {
   return function reactNativeDriver(vdom$: Stream<React.ReactElement<any>>) {
     function componentFactory() {
       return React.createClass<any, {vdom: React.ReactElement<any>}>({
@@ -25,20 +25,6 @@ export function makeScreenDriver(appKey: string, RNEventEmitter: any) {
 
     AppRegistry.registerComponent(appKey, componentFactory);
 
-    const topLevelEvent$ = xs.create({
-      start(listener: Listener<any>) {
-        const oldHandleTopLevel = RNEventEmitter.handleTopLevel;
-        RNEventEmitter.handleTopLevel =
-          (type: string, inst: any, nativeEvent: any, target: any) => {
-            const ev = {type, inst, nativeEvent, target};
-            listener.next(ev);
-            oldHandleTopLevel.call(this, type, inst, nativeEvent, target);
-          };
-      },
-      stop() {},
-    });
-    topLevelEvent$.addListener({});
-
-    return new ScreenSource(topLevelEvent$);
+    return new ScreenSource();
   };
 }

@@ -1,24 +1,22 @@
 import * as React from 'react';
-import {getShamefulHandlerSubject} from './handlers';
+import {getHandlers} from './handlers';
 
 export type PropsExtensions = {
-  shamefullySendToSource?: {
-    [onFoo: string]: string;
-  };
+  selector?: string;
 };
 
-function incorporateShamefulHandlers<P>(props: P & PropsExtensions): P {
-  if (props.shamefullySendToSource) {
-    const mappingKeys = Object.keys(props.shamefullySendToSource);
-    const N = mappingKeys.length;
+function incorporateHandlers<P>(props: P & PropsExtensions): P {
+  if (props.selector) {
+    const handlers = getHandlers(props.selector);
+    const handlerEventTypes = Object.keys(handlers);
+    const N = handlerEventTypes.length;
     for (let i = 0; i < N; ++i) {
-      const onFoo = mappingKeys[i];
-      const sourceName = props.shamefullySendToSource[onFoo];
-      const subject = getShamefulHandlerSubject(sourceName);
-      props[onFoo] = (ev: any) => subject._n(ev);
+      const evType = handlerEventTypes[i];
+      const onFoo = `on${evType[0].toUpperCase()}${evType.slice(1)}`;
+      props[onFoo] = (ev: any) => handlers[evType]._n(ev);
     }
   }
-  delete props.shamefullySendToSource;
+  delete props.selector;
   return props;
 }
 
@@ -44,7 +42,7 @@ export function h<P>(type: React.ComponentClass<P>,
 
 function hP<P>(type: React.ComponentClass<P>,
                props: P & PropsExtensions): React.ReactElement<P> {
-  return internalH(type, incorporateShamefulHandlers(props), []);
+  return internalH(type, incorporateHandlers(props), []);
 }
 
 function hC<P>(type: React.ComponentClass<P>,
@@ -55,7 +53,7 @@ function hC<P>(type: React.ComponentClass<P>,
 function hCP<P>(type: React.ComponentClass<P>,
                 props: P & PropsExtensions,
                 children: string | Array<React.ReactElement<any>>): React.ReactElement<P> {
-  return internalH(type, incorporateShamefulHandlers(props), children);
+  return internalH(type, incorporateHandlers(props), children);
 }
 
 function internalH<P>(type: React.ComponentClass<P>,

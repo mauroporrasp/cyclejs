@@ -15,32 +15,14 @@ const {
   TouchableWithoutFeedback,
 } = ReactNative;
 
-function mockReactNativeEventEmitter() {
-  return {
-    handleTopLevel(type: string, i: any = {}, ne: any = null, t: any = 0) {
-    },
-    simulateEvent(key: string, type: string) {
-      this.handleTopLevel(type, {
-        _currentElement: {
-          _owner: {
-            _currentElement: {
-              key,
-            },
-          },
-        },
-      });
-    },
-  };
-}
-
 describe('Screen driver', function () {
   describe('with TouchableOpacity', function () {
-    it('should allow using shameful source . events', function (done) {
+    it('should allow using source . select . events', function (done) {
       function main(sources: {Screen: ScreenSource}) {
-        const inc$ = sources.Screen.events('foo');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
-          h(TouchableOpacity, {shamefullySendToSource: {onPress: 'foo'}}, [
+          h(TouchableOpacity, {selector: 'button'}, [
             h(View, [
               h(Text, {}, '' + i),
             ]),
@@ -49,10 +31,8 @@ describe('Screen driver', function () {
         return {Screen: vdom$};
       }
 
-      const RNEventEmitter = mockReactNativeEventEmitter();
-
       const {sinks, run} = setup(main, {
-        Screen: makeScreenDriver('example', RNEventEmitter),
+        Screen: makeScreenDriver('example'),
       });
 
       let turn = 0;
@@ -68,49 +48,15 @@ describe('Screen driver', function () {
 
       run();
     });
-
-    it('should allow using source . select . events', function (done) {
-      function main(sources: {Screen: ScreenSource}) {
-        const inc$ = sources.Screen.select('button').events('topTouchEnd');
-        const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
-        const vdom$ = count$.map((i: number) =>
-          h(TouchableOpacity, {key: 'button'}, [
-            h(View, [
-              h(Text, {}, '' + i),
-            ]),
-          ]),
-        );
-        return {Screen: vdom$};
-      }
-
-      const RNEventEmitter = mockReactNativeEventEmitter();
-
-      const {sinks, run} = setup(main, {
-        Screen: makeScreenDriver('example', RNEventEmitter),
-      });
-
-      let turn = 0;
-      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
-        const wrapper = shallow(React.createElement(() => vdom));
-        assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => RNEventEmitter.simulateEvent('button', 'topTouchEnd'));
-        turn++;
-        if (turn === 3) {
-          done();
-        }
-      }});
-
-      run();
-    });
   });
 
   describe('with TouchableNativeFeedback', function () {
     it('should allow using source . select . events', function (done) {
       function main(sources: any) {
-        const inc$ = sources.Screen.select('button').events('topTouchEnd');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
-          h(TouchableNativeFeedback, {key: 'button'}, [
+          h(TouchableNativeFeedback, {selector: 'button'}, [
             h(View, [
               h(Text, '' + i),
             ]),
@@ -119,17 +65,15 @@ describe('Screen driver', function () {
         return {Screen: vdom$};
       }
 
-      const RNEventEmitter = mockReactNativeEventEmitter();
-
       const {sinks, run} = setup(main, {
-        Screen: makeScreenDriver('example', RNEventEmitter),
+        Screen: makeScreenDriver('example'),
       });
 
       let turn = 0;
       sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
         const wrapper = shallow(React.createElement(() => vdom));
         assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => RNEventEmitter.simulateEvent('button', 'topTouchEnd'));
+        setTimeout(() => wrapper.simulate('press'));
         turn++;
         if (turn === 3) {
           done();
@@ -143,10 +87,10 @@ describe('Screen driver', function () {
   describe('with TouchableHighlight', function () {
     it('should allow using source . select . events', function (done) {
       function main(sources: any) {
-        const inc$ = sources.Screen.select('button').events('topTouchEnd');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
-          h(TouchableHighlight, {key: 'button'}, [
+          h(TouchableHighlight, {selector: 'button'}, [
             h(View, [
               h(Text, '' + i),
             ]),
@@ -155,17 +99,15 @@ describe('Screen driver', function () {
         return {Screen: vdom$};
       }
 
-      const RNEventEmitter = mockReactNativeEventEmitter();
-
       const {sinks, run} = setup(main, {
-        Screen: makeScreenDriver('example', RNEventEmitter),
+        Screen: makeScreenDriver('example'),
       });
 
       let turn = 0;
       sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
         const wrapper = shallow(React.createElement(() => vdom));
         assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => RNEventEmitter.simulateEvent('button', 'topTouchEnd'));
+        setTimeout(() => wrapper.simulate('press'));
         turn++;
         if (turn === 3) {
           done();
@@ -179,10 +121,10 @@ describe('Screen driver', function () {
   describe('with TouchableWithoutFeedback', function () {
     it('should allow using source . select . events', function (done) {
       function main(sources: any) {
-        const inc$ = sources.Screen.select('button').events('topTouchEnd');
+        const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
-          h(TouchableWithoutFeedback, {key: 'button'}, [
+          h(TouchableWithoutFeedback, {selector: 'button'}, [
             h(View, [
               h(Text, '' + i),
             ]),
@@ -191,17 +133,15 @@ describe('Screen driver', function () {
         return {Screen: vdom$};
       }
 
-      const RNEventEmitter = mockReactNativeEventEmitter();
-
       const {sinks, run} = setup(main, {
-        Screen: makeScreenDriver('example', RNEventEmitter),
+        Screen: makeScreenDriver('example'),
       });
 
       let turn = 0;
       sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
         const wrapper = shallow(React.createElement(() => vdom));
         assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => RNEventEmitter.simulateEvent('button', 'topTouchEnd'));
+        setTimeout(() => wrapper.simulate('press'));
         turn++;
         if (turn === 3) {
           done();
@@ -232,7 +172,7 @@ describe('Screen driver', function () {
       }
 
       const {sinks, run} = setup(main, {
-        Screen: makeScreenDriver('example', mockReactNativeEventEmitter()),
+        Screen: makeScreenDriver('example'),
       });
 
       const endlessSink$ = xs.merge(sinks.Screen, xs.never());
