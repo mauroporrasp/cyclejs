@@ -20,7 +20,7 @@ const ToastAndroid = (ReactNative as any).ToastAndroid = {
 };
 
 // Must import this after the mock
-const {makeToastDriver, Duration} = require('../toast');
+const {makeToastDriver, Duration} = require('../lib/index');
 
 let previousPlatformOS: any;
 

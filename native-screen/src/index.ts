@@ -11,8 +11,8 @@
  * @return {Function} the Screen driver function.
  * @function makeScreenDriver
  */
-export {makeScreenDriver} from './lib/screen/driver';
-export {ScreenSource} from './lib/screen/ScreenSource';
-export {h} from './lib/screen/h';
-export {Image, Text, View} from './lib/screen/Animated';
-export {ListView} from './lib/screen/ListView';
+export {makeScreenDriver} from './driver';
+export {ScreenSource} from './ScreenSource';
+export {h} from './h';
+export {Image, Text, View} from './Animated';
+export {ListView} from './ListView';

@@ -3,7 +3,7 @@ import * as React from 'react';
 import xs from 'xstream';
 import * as ReactNative from 'react-native';
 import {setup} from '@cycle/run';
-import {makeScreenDriver, ListView, ScreenSource, h} from '../screen';
+import {makeScreenDriver, ListView, ScreenSource, h} from '../lib/index';
 import {shallow} from 'enzyme';
 const assert = require('assert');
 const {

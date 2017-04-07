@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.common.json",
   "compilerOptions": {
-    "outDir": "./",
+    "outDir": "lib/",
     "lib": [
       "dom",
       "es5",
@@ -10,9 +10,7 @@
     ]
   },
   "files": [
-    "src/index.ts",
-    "src/screen.ts",
-    "src/toast.ts"
+    "src/index.ts"
   ],
   "exclude": [
     "node_modules"
