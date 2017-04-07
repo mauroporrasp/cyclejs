@@ -1,0 +1,55 @@
+{
+  "name": "@cycle/native-keyboard",
+  "version": "1.0.0-rc.1",
+  "description": "A Cycle.js Driver for interacting with the keyboard on native devices",
+  "author": "Andre Staltz",
+  "license": "MIT",
+  "homepage": "https://cycle.js.org",
+  "bugs": "https://github.com/cyclejs/cyclejs/issues",
+  "repository": "https://github.com/cyclejs/cyclejs/tree/master/html",
+  "keywords": [
+    "reactive",
+    "framework",
+    "xstream",
+    "functional",
+    "unidirectional",
+    "mvi",
+    "react-native",
+    "driver"
+  ],
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@cycle/run": "*",
+    "react": "^15.4.2",
+    "react-native": "0.42.3"
+  },
+  "peerDependencies": {
+    "xstream": "*"
+  },
+  "devDependencies": {
+    "@cycle/run": "^3.1.0",
+    "@types/enzyme": "^2.7.6",
+    "@types/mocha": "^2.2.40",
+    "@types/sinon": "^1.16.36",
+    "@types/react": "^15.0.20",
+    "@types/react-native": "^0.42.12",
+    "babel-cli": "^6.24.0",
+    "babel-preset-react-native": "^1.9.1",
+    "enzyme": "^2.8.0",
+    "markdox": "0.1.9",
+    "react-native-mock": "^0.3.1",
+    "react-test-renderer": "^15.4.2",
+    "sinon": "^2.1.0",
+    "xstream": "10.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "mocha": "../node_modules/.bin/mocha test/*.ts --require react-native-mock/mock.js --require ts-node/register --recursive",
+    "test": "npm run mocha",
+    "test-ci": "npm run test"
+  }
+}
