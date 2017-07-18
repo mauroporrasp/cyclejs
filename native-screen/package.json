@@ -1,6 +1,6 @@
 {
   "name": "@cycle/native-screen",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "description": "A Cycle.js Driver for interacting with native screens in mobile devices",
   "author": "Andre Staltz",
   "license": "MIT",
