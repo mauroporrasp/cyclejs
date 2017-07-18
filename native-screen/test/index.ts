@@ -15,17 +15,15 @@ const {
   TouchableWithoutFeedback,
 } = ReactNative;
 
-describe('Screen driver', function () {
-  describe('with TouchableOpacity', function () {
-    it('should allow using source . select . events', function (done) {
+describe('Screen driver', function() {
+  describe('with TouchableOpacity', function() {
+    it('should allow using source . select . events', function(done) {
       function main(sources: {Screen: ScreenSource}) {
         const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           h(TouchableOpacity, {selector: 'button'}, [
-            h(View, [
-              h(Text, {}, '' + i),
-            ]),
+            h(View, [h(Text, {}, '' + i)]),
           ]),
         );
         return {Screen: vdom$};
@@ -36,30 +34,33 @@ describe('Screen driver', function () {
       });
 
       let turn = 0;
-      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
-        const wrapper = shallow(React.createElement(() => vdom));
-        assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => wrapper.simulate('press'));
-        turn++;
-        if (turn === 3) {
-          done();
-        }
-      }});
+      sinks.Screen.take(3).addListener({
+        next: (vdom: React.ReactElement<any>) => {
+          const wrapper = shallow(React.createElement(() => vdom));
+          assert.strictEqual(
+            wrapper.childAt(0).childAt(0).childAt(0).text(),
+            `${turn}`,
+          );
+          setTimeout(() => wrapper.simulate('press'));
+          turn++;
+          if (turn === 3) {
+            done();
+          }
+        },
+      });
 
       run();
     });
   });
 
-  describe('with TouchableNativeFeedback', function () {
-    it('should allow using source . select . events', function (done) {
+  describe('with TouchableNativeFeedback', function() {
+    it('should allow using source . select . events', function(done) {
       function main(sources: any) {
         const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           h(TouchableNativeFeedback, {selector: 'button'}, [
-            h(View, [
-              h(Text, '' + i),
-            ]),
+            h(View, [h(Text, '' + i)]),
           ]),
         );
         return {Screen: vdom$};
@@ -70,30 +71,33 @@ describe('Screen driver', function () {
       });
 
       let turn = 0;
-      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
-        const wrapper = shallow(React.createElement(() => vdom));
-        assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => wrapper.simulate('press'));
-        turn++;
-        if (turn === 3) {
-          done();
-        }
-      }});
+      sinks.Screen.take(3).addListener({
+        next: (vdom: React.ReactElement<any>) => {
+          const wrapper = shallow(React.createElement(() => vdom));
+          assert.strictEqual(
+            wrapper.childAt(0).childAt(0).childAt(0).text(),
+            `${turn}`,
+          );
+          setTimeout(() => wrapper.simulate('press'));
+          turn++;
+          if (turn === 3) {
+            done();
+          }
+        },
+      });
 
       run();
     });
   });
 
-  describe('with TouchableHighlight', function () {
-    it('should allow using source . select . events', function (done) {
+  describe('with TouchableHighlight', function() {
+    it('should allow using source . select . events', function(done) {
       function main(sources: any) {
         const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           h(TouchableHighlight, {selector: 'button'}, [
-            h(View, [
-              h(Text, '' + i),
-            ]),
+            h(View, [h(Text, '' + i)]),
           ]),
         );
         return {Screen: vdom$};
@@ -104,30 +108,33 @@ describe('Screen driver', function () {
       });
 
       let turn = 0;
-      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
-        const wrapper = shallow(React.createElement(() => vdom));
-        assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => wrapper.simulate('press'));
-        turn++;
-        if (turn === 3) {
-          done();
-        }
-      }});
+      sinks.Screen.take(3).addListener({
+        next: (vdom: React.ReactElement<any>) => {
+          const wrapper = shallow(React.createElement(() => vdom));
+          assert.strictEqual(
+            wrapper.childAt(0).childAt(0).childAt(0).text(),
+            `${turn}`,
+          );
+          setTimeout(() => wrapper.simulate('press'));
+          turn++;
+          if (turn === 3) {
+            done();
+          }
+        },
+      });
 
       run();
     });
   });
 
-  describe('with TouchableWithoutFeedback', function () {
-    it('should allow using source . select . events', function (done) {
+  describe('with TouchableWithoutFeedback', function() {
+    it('should allow using source . select . events', function(done) {
       function main(sources: any) {
         const inc$ = sources.Screen.select('button').events('press');
         const count$ = inc$.fold((acc: number, x: any) => acc + 1, 0);
         const vdom$ = count$.map((i: number) =>
           h(TouchableWithoutFeedback, {selector: 'button'}, [
-            h(View, [
-              h(Text, '' + i),
-            ]),
+            h(View, [h(Text, '' + i)]),
           ]),
         );
         return {Screen: vdom$};
@@ -138,34 +145,36 @@ describe('Screen driver', function () {
       });
 
       let turn = 0;
-      sinks.Screen.take(3).addListener({next: (vdom: React.ReactElement<any>) => {
-        const wrapper = shallow(React.createElement(() => vdom));
-        assert.strictEqual(wrapper.childAt(0).childAt(0).childAt(0).text(), `${turn}`);
-        setTimeout(() => wrapper.simulate('press'));
-        turn++;
-        if (turn === 3) {
-          done();
-        }
-      }});
+      sinks.Screen.take(3).addListener({
+        next: (vdom: React.ReactElement<any>) => {
+          const wrapper = shallow(React.createElement(() => vdom));
+          assert.strictEqual(
+            wrapper.childAt(0).childAt(0).childAt(0).text(),
+            `${turn}`,
+          );
+          setTimeout(() => wrapper.simulate('press'));
+          turn++;
+          if (turn === 3) {
+            done();
+          }
+        },
+      });
 
       run();
     });
   });
 
-  describe('with ListView', function () {
-    it('should evolve over time', function (done) {
+  describe('with ListView', function() {
+    it('should evolve over time', function(done) {
       function main(sources: any) {
-        const persons$ = xs.periodic(100).take(2).map(i =>
-          [
-            [{name: 'Alice'}],
-            [{name: 'Alice'}, {name: 'Bob'}],
-          ][i],
-        );
+        const persons$ = xs
+          .periodic(100)
+          .take(2)
+          .map(i => [[{name: 'Alice'}], [{name: 'Alice'}, {name: 'Bob'}]][i]);
         const vdom$ = persons$.map(persons =>
-          h(ListView, {items: persons, renderRow: (item: any) =>
-            h(View, [
-              h(Text, item.name),
-            ]),
+          h(ListView, {
+            items: persons,
+            renderRow: (item: any) => h(View, [h(Text, item.name)]),
           }),
         );
         return {Screen: vdom$};
@@ -176,20 +185,26 @@ describe('Screen driver', function () {
       });
 
       const endlessSink$ = xs.merge(sinks.Screen, xs.never());
-      endlessSink$.take(1).addListener({next: vdom => {
-        const wrapper = shallow(vdom);
-        const dataBlob = wrapper.instance().state.dataSource._dataBlob;
-        assert.strictEqual(dataBlob.length, 1);
-        assert.strictEqual(JSON.stringify(dataBlob[0]), '{"name":"Alice"}');
-      }});
-      endlessSink$.drop(1).take(1).addListener({next: vdom => {
-        const wrapper = shallow(vdom);
-        const dataBlob = wrapper.instance().state.dataSource._dataBlob;
-        assert.strictEqual(dataBlob.length, 2);
-        assert.strictEqual(JSON.stringify(dataBlob[0]), '{"name":"Alice"}');
-        assert.strictEqual(JSON.stringify(dataBlob[1]), '{"name":"Bob"}');
-        done();
-      }});
+      endlessSink$.take(1).addListener({
+        next: vdom => {
+          const wrapper = shallow(vdom);
+          const dataBlob =
+            wrapper['renderer']._instance.state.dataSource._dataBlob;
+          assert.strictEqual(dataBlob.length, 1);
+          assert.strictEqual(JSON.stringify(dataBlob[0]), '{"name":"Alice"}');
+        },
+      });
+      endlessSink$.drop(1).take(1).addListener({
+        next: vdom => {
+          const wrapper = shallow(vdom);
+          const dataBlob =
+            wrapper['renderer']._instance.state.dataSource._dataBlob;
+          assert.strictEqual(dataBlob.length, 2);
+          assert.strictEqual(JSON.stringify(dataBlob[0]), '{"name":"Alice"}');
+          assert.strictEqual(JSON.stringify(dataBlob[1]), '{"name":"Bob"}');
+          done();
+        },
+      });
 
       run();
     });
