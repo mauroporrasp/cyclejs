@@ -1,26 +1,11 @@
 'use strict';
 var fs = require('fs');
 
-<<<<<<< HEAD
-var packageScopes = [
-  'devtool',
-  'dom',
-  'html',
-  'history',
-  'http',
-  'isolate',
-  'most-run',
-  'run',
-  'rxjs-run',
-  'time'
-];
-=======
 var packageScopes = fs
   .readFileSync('.scripts/RELEASABLE_PACKAGES', 'ascii')
   .split('\n')
   .map(s => s.trim())
   .filter(s => !!s);
->>>>>>> chore(META): add package native to RELEASABLE_PACKAGES
 
 var otherScopes = [
   'META',
