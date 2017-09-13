@@ -21,11 +21,11 @@
   "typings": "lib/index.d.ts",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@cycle/run": "*",
-    "react": "16.0.0-alpha.13",
-    "react-native": "0.45.1"
+    "@cycle/run": "*"
   },
   "peerDependencies": {
+    "react": "*",
+    "react-native": ">=0.45.1",
     "xstream": "*"
   },
   "devDependencies": {
@@ -39,6 +39,8 @@
     "babel-preset-react-native": "2.0.0",
     "enzyme": "^2.8.0",
     "markdox": "0.1.9",
+    "react": "16.0.0-alpha.13",
+    "react-native": "0.45.1",
     "@huston007/react-native-mock": "^0.3.3",
     "react-test-renderer": "16.0.0-alpha.13",
     "sinon": "^2.1.0",
