@@ -21,26 +21,26 @@
   "typings": "lib/index.d.ts",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@cycle/run": "*",
-    "react": "^15.4.2",
-    "react-native": "0.42.3"
+    "@cycle/run": "*"
   },
   "peerDependencies": {
+    "react": "*",
+    "react-native": ">=0.42.3",
     "xstream": "*"
   },
   "devDependencies": {
     "@cycle/run": "^3.1.0",
-    "@types/enzyme": "^2.7.6",
     "@types/mocha": "^2.2.40",
+    "@types/react": "^15.0.38",
+    "@types/react-native": "0.46.x",
     "@types/sinon": "^1.16.36",
-    "@types/react": "^15.0.20",
-    "@types/react-native": "^0.42.12",
     "babel-cli": "^6.24.0",
     "babel-preset-react-native": "^1.9.1",
-    "enzyme": "^2.8.0",
     "markdox": "0.1.9",
-    "react-native-mock": "^0.3.1",
-    "react-test-renderer": "^15.4.2",
+    "react": "16.0.0-alpha.13",
+    "react-native": "0.45.1",
+    "@huston007/react-native-mock": "^0.3.3",
+    "react-test-renderer": "16.0.0-alpha.13",
     "sinon": "^2.1.0",
     "xstream": "^10.3.0"
   },
@@ -48,7 +48,7 @@
     "access": "public"
   },
   "scripts": {
-    "mocha": "../node_modules/.bin/mocha test/*.ts --require react-native-mock/mock.js --require ts-node/register --recursive",
+    "mocha": "../node_modules/.bin/mocha test/*.ts --require @huston007/react-native-mock/mock.js --require ts-node/register --recursive",
     "test": "npm run mocha",
     "test-ci": "npm run test"
   }
