@@ -1,6 +1,7 @@
-import './dom-driver';
-import './render';
-import './events';
-import './select';
-import './elements';
-import './isolation';
+//import './dom-driver';
+//import './render';
+//import './events';
+//import './select';
+//import './elements';
+//import './isolation';
+import './dev';

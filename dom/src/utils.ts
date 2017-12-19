@@ -1,3 +1,5 @@
+import {Scope} from './isolate';
+
 function isValidNode(obj: any): obj is Element {
   const ELEM_TYPE = 1;
   const FRAG_TYPE = 11;
@@ -19,8 +21,6 @@ export function isDocFrag(
 ): el is DocumentFragment {
   return el.nodeType === 11;
 }
-
-export const SCOPE_PREFIX = '$$CYCLEDOM$$-';
 
 export function checkValidContainer(
   container: Element | DocumentFragment | string,
@@ -46,18 +46,24 @@ export function getValidNode(
   return domElement;
 }
 
-/**
- * The full scope of a namespace is the "absolute path" of scopes from
- * parent to child. This is extracted from the namespace, filter only for
- * scopes in the namespace.
- */
-export function getFullScope(namespace: Array<String>): string {
+export function getSelectors(namespace: Array<Scope>): string {
   return namespace
-    .filter(c => c.indexOf(SCOPE_PREFIX) > -1)
-    .map(c => c.replace(SCOPE_PREFIX, ''))
-    .join('-');
+    .filter(n => n.type === 'selector')
+    .map(n => n.scope)
+    .join(' ');
 }
 
-export function getSelectors(namespace: Array<String>): string {
-  return namespace.filter(c => c.indexOf(SCOPE_PREFIX) === -1).join(' ');
+export function isEqualNamespace(
+  a: Array<Scope> | undefined,
+  b: Array<Scope> | undefined,
+): boolean {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].type !== b[i].type || a[i].scope !== b[i].scope) {
+      return false;
+    }
+  }
+  return true;
 }

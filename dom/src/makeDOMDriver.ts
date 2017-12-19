@@ -85,7 +85,6 @@ function makeDOMDriver(
   const patch = init([isolateModule.createModule()].concat(modules));
   const domReady$ = makeDOMReady$();
   let vnodeWrapper: VNodeWrapper;
-  const delegators = new Map<string, EventDelegator>();
   let mutationObserver: MutationObserver;
   const mutationConfirmed$ = xs.create<null>({
     start(listener) {
@@ -153,12 +152,14 @@ function makeDOMDriver(
     // Start the snabbdom patching, over time
     rootElement$.addListener({error: reportSnabbdomError});
 
+    const delegator = new EventDelegator(rootElement$, isolateModule);
+
     return new MainDOMSource(
       rootElement$,
       sanitation$,
       [],
       isolateModule,
-      delegators,
+      delegator,
       name,
     );
   }

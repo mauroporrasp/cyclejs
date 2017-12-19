@@ -1,8 +1,9 @@
 import xs, {Stream} from 'xstream';
 import {ScopeChecker} from './ScopeChecker';
 import {IsolateModule} from './IsolateModule';
-import {getFullScope, getSelectors} from './utils';
-import {matchesSelector} from './matchesSelector';
+import {getSelectors} from './utils';
+import {Scope} from './isolate';
+import {fromEvent} from './fromEvent';
 import {PreventDefaultOpt, preventDefaultConditional} from './fromEvent';
 declare var requestIdleCallback: any;
 
@@ -18,29 +19,8 @@ export interface CycleDOMEvent extends Event {
   ownerTarget: Element;
 }
 
-/**
- * Finds (with binary search) index of the destination that id equal to searchId
- * among the destinations in the given array.
- */
-function indexOf(arr: Array<Destination>, searchId: number): number {
-  let minIndex = 0;
-  let maxIndex = arr.length - 1;
-  let currentIndex: number;
-  let current: Destination;
-
-  while (minIndex <= maxIndex) {
-    currentIndex = ((minIndex + maxIndex) / 2) | 0; // tslint:disable-line:no-bitwise
-    current = arr[currentIndex];
-    const currentId = current.id;
-    if (currentId < searchId) {
-      minIndex = currentIndex + 1;
-    } else if (currentId > searchId) {
-      maxIndex = currentIndex - 1;
-    } else {
-      return currentIndex;
-    }
-  }
-  return -1;
+export interface ListenerTree {
+  [scope: string]: Stream<Event> | ListenerTree;
 }
 
 /**
@@ -53,97 +33,46 @@ function indexOf(arr: Array<Destination>, searchId: number): number {
  * isolation boundaries too.
  */
 export class EventDelegator {
-  private destinations: Array<Destination> = [];
-  private listener: EventListener;
-  private _lastId = 0;
+  private listeners: ListenerTree;
+  private origin: Element;
+  private eventStreamByType: Map<string, Stream<Event>>;
 
   constructor(
-    private origin: Element,
-    public eventType: string,
-    public useCapture: boolean,
+    private rootElement$: Stream<Element>,
     public isolateModule: IsolateModule,
-    public preventDefault: PreventDefaultOpt = false,
   ) {
-    if (preventDefault) {
-      if (useCapture) {
-        this.listener = (ev: Event) => {
-          preventDefaultConditional(ev, preventDefault);
-          this.capture(ev);
-        };
-      } else {
-        this.listener = (ev: Event) => {
-          preventDefaultConditional(ev, preventDefault);
-          this.bubble(ev);
-        };
-      }
-    } else {
-      if (useCapture) {
-        this.listener = (ev: Event) => this.capture(ev);
-      } else {
-        this.listener = (ev: Event) => this.bubble(ev);
-      }
+    this.eventStreamByType = new Map<string, Stream<Event>>();
+    this.listeners = {};
+    rootElement$
+      .drop(1)
+      .take(1)
+      .addListener({
+        next: el => {
+          this.origin = el;
+        },
+      });
+  }
+
+  public addEventListener(
+    eventType: string,
+    namespace: Array<Scope>,
+    useCapture: boolean,
+    options: PreventDefaultOpt,
+  ): Stream<Event> {
+    if (!this.origin) return xs.empty();
+    let rootEvent$ = this.eventStreamByType.get(eventType); //TODO: Non-bubbleing events
+    if (rootEvent$ === undefined) {
+      rootEvent$ = fromEvent(this.origin, eventType, useCapture, options);
+      this.eventStreamByType.set(eventType, rootEvent$);
     }
-    origin.addEventListener(eventType, this.listener, useCapture);
-  }
+    const checker = new ScopeChecker(namespace, this.isolateModule);
 
-  public updateOrigin(newOrigin: Element) {
-    this.origin.removeEventListener(
-      this.eventType,
-      this.listener,
-      this.useCapture,
+    return rootEvent$.filter(ev =>
+      checker.isDirectlyInScope(ev.currentTarget as Element),
     );
-    newOrigin.addEventListener(this.eventType, this.listener, this.useCapture);
-    this.origin = newOrigin;
   }
 
-  /**
-   * Creates a *new* destination given the namespace and returns the subject
-   * representing the destination of events. Is not referentially transparent,
-   * will always return a different output for the same input.
-   */
-  public createDestination(namespace: Array<string>): Stream<Event> {
-    const id = this._lastId++;
-    const selector = getSelectors(namespace);
-    const scopeChecker = new ScopeChecker(
-      getFullScope(namespace),
-      this.isolateModule,
-    );
-    const subject = xs.create<Event>({
-      start: () => {},
-      stop: () => {
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(() => {
-            this.removeDestination(id);
-          });
-        } else {
-          this.removeDestination(id);
-        }
-      },
-    });
-    const destination: Destination = {id, selector, scopeChecker, subject};
-    this.destinations.push(destination);
-    return subject;
-  }
-
-  /**
-   * Removes the destination that has the given id.
-   */
-  private removeDestination(id: number): void {
-    const i = indexOf(this.destinations, id);
-    i >= 0 && this.destinations.splice(i, 1); // tslint:disable-line:no-unused-expression
-  }
-
-  private capture(ev: Event) {
-    const n = this.destinations.length;
-    for (let i = 0; i < n; i++) {
-      const dest = this.destinations[i];
-      if (matchesSelector(ev.target as Element, dest.selector)) {
-        dest.subject._n(ev);
-      }
-    }
-  }
-
-  private bubble(rawEvent: Event): void {
+  /*private bubble(rawEvent: Event): void {
     const origin = this.origin;
     if (!origin.contains(rawEvent.currentTarget as Node)) {
       return;
@@ -176,20 +105,6 @@ export class EventDelegator {
     return pEvent;
   }
 
-  private matchEventAgainstDestinations(el: Element, ev: CycleDOMEvent) {
-    const n = this.destinations.length;
-    for (let i = 0; i < n; i++) {
-      const dest = this.destinations[i];
-      if (!dest.scopeChecker.isDirectlyInScope(el)) {
-        continue;
-      }
-      if (matchesSelector(el, dest.selector)) {
-        this.mutateEventCurrentTarget(ev, el);
-        dest.subject._n(ev);
-      }
-    }
-  }
-
   private mutateEventCurrentTarget(
     event: CycleDOMEvent,
     currentTargetElement: Element,
@@ -203,5 +118,5 @@ export class EventDelegator {
       console.log(`please use event.ownerTarget`);
     }
     event.ownerTarget = currentTargetElement;
-  }
+  }*/
 }
