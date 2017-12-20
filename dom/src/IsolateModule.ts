@@ -7,7 +7,7 @@ export interface NamespaceTree {
   [name: string]: Element | NamespaceTree;
 }
 
-const elmSymbol = '__CYCLEINDEX__'; //Symbol("namespaceTree");
+const elmSymbol = Symbol('namespaceTree');
 
 export class IsolateModule {
   private namespaceTree: NamespaceTree;
@@ -30,11 +30,12 @@ export class IsolateModule {
     let curr = this.namespaceTree;
     for (let i = 0; i < namespace.length; i++) {
       const n = namespace[i];
-      if (n.type === 'selector') {
-        continue;
-      }
+      //console.log(JSON.stringify(curr), n, namespace);
       if (curr === undefined) {
         return undefined;
+      }
+      if (n.type === 'selector') {
+        continue;
       }
       curr = curr[n.scope] as NamespaceTree;
     }
@@ -58,8 +59,8 @@ export class IsolateModule {
     for (let i = 0; i < namespace.length; i++) {
       curr = curr[namespace[i].scope] as NamespaceTree;
     }
-    const elm = curr[''] as Element;
-    delete curr[''];
+    const elm = curr[elmSymbol] as Element;
+    delete curr[elmSymbol];
     this.namespaceByElement.delete(elm);
   }
 
@@ -79,7 +80,7 @@ export class IsolateModule {
 
   public reset() {
     this.namespaceTree = {};
-    const root: Element = this.namespaceTree[''] as Element;
+    const root: Element = this.namespaceTree[elmSymbol] as Element;
     this.namespaceByElement.clear();
     this.namespaceByElement.set(root, []);
   }

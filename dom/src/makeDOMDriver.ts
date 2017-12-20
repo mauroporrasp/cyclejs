@@ -17,7 +17,7 @@ import 'es6-map/implement'; // tslint:disable-line
 function makeDOMDriverInputGuard(modules: any) {
   if (!Array.isArray(modules)) {
     throw new Error(
-      `Optional modules option must be ` + `an array for snabbdom modules`,
+      `Optional modules option must be an array for snabbdom modules`,
     );
   }
 }
@@ -69,6 +69,17 @@ function makeDOMReady$(): Stream<null> {
     },
     stop() {},
   });
+}
+
+function addRootScope(vnode: VNode): VNode {
+  vnode.data = vnode.data || {};
+  vnode.data.isolate = [];
+  return vnode;
+}
+
+function addSelector(vnode: VNode): VNode {
+  vnode.sel += '.cycleroot';
+  return vnode;
 }
 
 function makeDOMDriver(
@@ -123,8 +134,9 @@ function makeDOMDriver(
           xs
             .merge(rememberedVNode$.endWhen(sanitation$), sanitation$)
             .map(vnode => vnodeWrapper.call(vnode))
-            .fold(patch, toVNode(firstRoot))
-            .drop(1)
+            .startWith(addRootScope(toVNode(firstRoot)))
+            .fold(patch, firstRoot as any)
+            .drop(2)
             .map(unwrapElementFromVNode)
             .startWith(firstRoot as any)
             .map(el => {

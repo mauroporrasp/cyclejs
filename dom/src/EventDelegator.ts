@@ -8,8 +8,9 @@ import {PreventDefaultOpt, preventDefaultConditional} from './fromEvent';
 declare var requestIdleCallback: any;
 
 interface Destination {
-  id: number;
-  selector: string;
+  eventType: string;
+  useCapture: boolean;
+  options: PreventDefaultOpt;
   scopeChecker: ScopeChecker;
   subject: Stream<Event>;
 }
@@ -19,9 +20,11 @@ export interface CycleDOMEvent extends Event {
   ownerTarget: Element;
 }
 
-export interface ListenerTree {
-  [scope: string]: Stream<Event> | ListenerTree;
+interface ListenerTree {
+  [scope: string]: Destination | ListenerTree;
 }
+
+const listenerSymbol = Symbol('listener');
 
 /**
  * Manages "Event delegation", by connecting an origin with multiple
@@ -48,7 +51,10 @@ export class EventDelegator {
       .take(1)
       .addListener({
         next: el => {
-          this.origin = el;
+          if (this.origin !== el) {
+            this.origin = el;
+            this.resetEventListeners();
+          }
         },
       });
   }
@@ -59,18 +65,55 @@ export class EventDelegator {
     useCapture: boolean,
     options: PreventDefaultOpt,
   ): Stream<Event> {
-    if (!this.origin) return xs.empty();
+    const subject = xs.never();
+    const scopeChecker = new ScopeChecker(namespace, this.isolateModule);
+
+    this.insertListener(subject, scopeChecker, eventType, useCapture, options);
     let rootEvent$ = this.eventStreamByType.get(eventType); //TODO: Non-bubbleing events
-    if (rootEvent$ === undefined) {
+    if (rootEvent$ === undefined && this.origin !== undefined) {
       rootEvent$ = fromEvent(this.origin, eventType, useCapture, options);
       this.eventStreamByType.set(eventType, rootEvent$);
     }
-    const checker = new ScopeChecker(namespace, this.isolateModule);
+    if (rootEvent$ !== undefined) {
+      rootEvent$
+        .filter(ev =>
+          scopeChecker.isDirectlyInScope(ev.currentTarget as Element),
+        )
+        .addListener({
+          next: ev => {
+            subject.shamefullySendNext(ev);
+          },
+        });
+    }
 
-    return rootEvent$.filter(ev =>
-      checker.isDirectlyInScope(ev.currentTarget as Element),
-    );
+    return subject;
   }
+
+  private insertListener(
+    subject: Stream<Event>,
+    scopeChecker: ScopeChecker,
+    eventType: string,
+    useCapture: boolean,
+    options: PreventDefaultOpt,
+  ): void {
+    let curr = this.listeners;
+    for (let i = 0; i < scopeChecker.namespace.length; i++) {
+      const n = scopeChecker.namespace[i];
+      if (n.type === 'selector') {
+        continue;
+      }
+      curr = (curr[n.scope] || {}) as ListenerTree;
+    }
+    curr[listenerSymbol] = {
+      eventType,
+      useCapture,
+      options,
+      scopeChecker,
+      subject,
+    };
+  }
+
+  private resetEventListeners(): void {}
 
   /*private bubble(rawEvent: Event): void {
     const origin = this.origin;

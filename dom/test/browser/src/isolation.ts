@@ -38,48 +38,6 @@ function createRenderTarget(id: string | null = null) {
 }
 
 describe('isolateSource', function() {
-  it('should have the same effect as DOM.select()', function(done) {
-    function app(sources: {DOM: MainDOMSource}) {
-      return {
-        DOM: xs.of(
-          h3('.top-most', [
-            h2('.bar', 'Wrong'),
-            div({isolate: 'foo'}, [h4('.bar', 'Correct')]),
-          ]),
-        ),
-      };
-    }
-
-    const {sinks, sources, run} = setup(app, {
-      DOM: makeDOMDriver(createRenderTarget()),
-    });
-
-    let dispose: any;
-    const isolatedDOMSource = sources.DOM.isolateSource(sources.DOM, 'foo');
-
-    // Make assertions
-    isolatedDOMSource
-      .select('.bar')
-      .elements()
-      .drop(1)
-      .take(1)
-      .addListener({
-        next: (elements: Array<Element>) => {
-          assert.strictEqual(elements.length, 1);
-          const correctElement = elements[0];
-          assert.notStrictEqual(correctElement, null);
-          assert.notStrictEqual(typeof correctElement, 'undefined');
-          assert.strictEqual(correctElement.tagName, 'H4');
-          assert.strictEqual(correctElement.textContent, 'Correct');
-          setTimeout(() => {
-            dispose();
-            done();
-          });
-        },
-      });
-    dispose = run();
-  });
-
   it('should return source also with isolateSource and isolateSink', function(
     done,
   ) {
@@ -123,7 +81,10 @@ describe('isolateSink', function() {
     sinks.DOM.take(1).addListener({
       next: (vtree: VNode) => {
         assert.strictEqual(vtree.sel, 'h3.top-most');
-        assert.strictEqual((vtree.data as any).isolate, 'foo');
+        assert.strictEqual(Array.isArray((vtree.data as any).isolate), true);
+        assert.deepStrictEqual((vtree.data as any).isolate, [
+          {type: 'total', scope: 'foo'},
+        ]);
         setTimeout(() => {
           dispose();
           done();
@@ -166,7 +127,11 @@ describe('isolateSink', function() {
       .addListener({
         next: (vtree: VNode) => {
           assert.strictEqual(vtree.sel, 'span.tab1');
-          assert.strictEqual((vtree.data as any).isolate, '1');
+          assert.strictEqual(Array.isArray((vtree.data as any).isolate), true);
+          assert.strictEqual((vtree.data as any).isolate.length, 1);
+          assert.deepStrictEqual((vtree.data as any).isolate, [
+            {type: 'total', scope: '1'},
+          ]);
           dispose();
           done();
         },

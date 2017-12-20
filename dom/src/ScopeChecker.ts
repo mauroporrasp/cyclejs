@@ -3,7 +3,7 @@ import {Scope} from './isolate';
 import {isEqualNamespace} from './utils';
 
 export class ScopeChecker {
-  private namespace: Array<Scope>;
+  public namespace: Array<Scope>;
   constructor(_namespace: Array<Scope>, private isolateModule: IsolateModule) {
     this.namespace = _namespace.filter(n => n.type !== 'selector');
   }

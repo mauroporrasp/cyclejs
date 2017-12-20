@@ -7,7 +7,7 @@ import {DocumentDOMSource} from './DocumentDOMSource';
 import {BodyDOMSource} from './BodyDOMSource';
 import {VNode} from 'snabbdom/vnode';
 import {ElementFinder} from './ElementFinder';
-import {makeIsolateSink, getScopeObj, Scope, IsolateSink} from './isolate';
+import {isolateSink, getScopeObj, Scope, IsolateSink} from './isolate';
 import {IsolateModule} from './IsolateModule';
 import {EventDelegator} from './EventDelegator';
 
@@ -79,7 +79,7 @@ export class MainDOMSource implements DOMSource {
         source._name,
       );
     };
-    this.isolateSink = makeIsolateSink(this._namespace);
+    this.isolateSink = isolateSink;
   }
 
   public elements(): MemoryStream<Array<Element>> {
@@ -132,10 +132,15 @@ export class MainDOMSource implements DOMSource {
       return new BodyDOMSource(this._name);
     }
 
+    const namespace =
+      selector === ':root'
+        ? []
+        : this._namespace.concat({type: 'selector', scope: selector.trim()});
+
     return new MainDOMSource(
       this._rootElement$,
       this._sanitation$,
-      this._namespace.concat({type: 'selector', scope: selector.trim()}),
+      namespace,
       this._isolateModule,
       this._eventDelegator,
       this._name,

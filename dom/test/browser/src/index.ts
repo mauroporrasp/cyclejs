@@ -3,5 +3,4 @@
 //import './events';
 //import './select';
 //import './elements';
-//import './isolation';
-import './dev';
+import './isolation';

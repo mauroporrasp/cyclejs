@@ -11,29 +11,30 @@ export interface Scope {
 export type Sink = Stream<VNode | null | undefined>;
 export type IsolateSink = (s: Sink, scope: string) => Sink;
 
-export function makeIsolateSink(namespace: Array<Scope>): IsolateSink {
-  return (sink, scope) => {
-    if (scope === ':root') {
-      return sink;
-    }
-    return sink.map(node => {
-      if (!node) {
-        return node;
-      }
-      const scopeObj = getScopeObj(scope);
-      if (
-        node.data &&
-        (node.data as any).isolate &&
-        Array.isArray((node.data as any).isolate)
-      ) {
-        node.data.isolate.unshift(scopeObj);
-      } else {
-        node.data = node.data || {};
-        (node.data as any).isolate = [scopeObj];
-      }
+export function isolateSink(sink: Sink, scope: string): Sink {
+  if (scope === ':root') {
+    return sink;
+  }
+  return sink.map(node => {
+    if (!node) {
       return node;
-    });
-  };
+    }
+    let newNode = {
+      ...node,
+      data: {
+        ...node.data,
+        isolate:
+          node.data && Array.isArray(node.data.isolate)
+            ? node.data.isolate.map((x: any) => x)
+            : [],
+      },
+    };
+
+    const scopeObj = getScopeObj(scope);
+    newNode.data.isolate.unshift(scopeObj);
+
+    return newNode;
+  });
 }
 
 export function getScopeObj(scope: string): Scope {
