@@ -37,7 +37,7 @@ function createRenderTarget(id: string | null = null) {
   return element;
 }
 
-describe('isolateSource', function() {
+/*describe('isolateSource', function() {
   it('should return source also with isolateSource and isolateSink', function(
     done,
   ) {
@@ -138,10 +138,10 @@ describe('isolateSink', function() {
       });
     dispose = run();
   });
-});
+});*/
 
 describe('isolation', function() {
-  it('should prevent parent from DOM.selecting() inside the isolation', function(
+  /*it('should prevent parent from DOM.selecting() inside the isolation', function(
     done,
   ) {
     function app(sources: {DOM: MainDOMSource}) {
@@ -484,7 +484,7 @@ describe('isolation', function() {
         },
       });
     run();
-  });
+  });*/
 
   it('should isolate DOM.select between parent and (wrapper) child', function(
     done,
@@ -503,7 +503,7 @@ describe('isolation', function() {
     function Monalisa(sources: {DOM: MainDOMSource}) {
       const {isolateSource, isolateSink} = sources.DOM;
 
-      const islandDOMSource = isolateSource(sources.DOM, 'island');
+      const islandDOMSource = isolateSource(sources.DOM, '.island');
       const click$ = islandDOMSource.select('.foo').events('click');
       const islandDOMSink$ = isolateSink(
         xs.of(span('.foo.monalisa', 'Monalisa')),
@@ -528,15 +528,19 @@ describe('isolation', function() {
     });
     let dispose: any;
 
-    const frameClick$ = sinks.frameClick.map(ev => ({
-      type: ev.type,
-      tagName: (ev.target as HTMLElement).tagName,
-    }));
+    const frameClick$ = sinks.frameClick
+      .map(ev => ({
+        type: ev.type,
+        tagName: (ev.target as HTMLElement).tagName,
+      }))
+      .debug('frameClick');
 
-    const monalisaClick$ = sinks.monalisaClick.map(ev => ({
-      type: ev.type,
-      tagName: (ev.target as HTMLElement).tagName,
-    }));
+    const monalisaClick$ = sinks.monalisaClick
+      .map(ev => ({
+        type: ev.type,
+        tagName: (ev.target as HTMLElement).tagName,
+      }))
+      .debug('monalisaClick');
 
     // Stop the propagtion of the first click
     sinks.monalisaClick.take(1).addListener({
@@ -602,7 +606,7 @@ describe('isolation', function() {
     dispose = run();
   });
 
-  it('should allow a child component to DOM.select() its own root', function(
+  /*it('should allow a child component to DOM.select() its own root', function(
     done,
   ) {
     function app(sources: {DOM: MainDOMSource}) {
@@ -1782,5 +1786,5 @@ describe('isolation', function() {
       });
 
     dispose = run();
-  });
+  });*/
 });

@@ -53,7 +53,7 @@ export class EventDelegator {
         next: el => {
           if (this.origin !== el) {
             this.origin = el;
-            this.resetEventListeners();
+            this.resetEventListeners(this.listeners);
           }
         },
       });
@@ -102,7 +102,7 @@ export class EventDelegator {
       if (n.type === 'selector') {
         continue;
       }
-      curr = (curr[n.scope] || {}) as ListenerTree;
+      curr[n.scope] = (curr[n.scope] || {}) as ListenerTree;
     }
     curr[listenerSymbol] = {
       eventType,
@@ -113,7 +113,40 @@ export class EventDelegator {
     };
   }
 
-  private resetEventListeners(): void {}
+  private resetEventListeners(tree: ListenerTree): void {
+    const listener = tree[listenerSymbol];
+    if (listener !== undefined) {
+      let dest = listener as Destination;
+      let rootEvent$ = this.eventStreamByType.get(dest.eventType);
+      if (rootEvent$ === undefined) {
+        rootEvent$ = fromEvent(
+          this.origin,
+          dest.eventType,
+          dest.useCapture,
+          dest.options,
+        );
+        this.eventStreamByType.set(dest.eventType, rootEvent$);
+      }
+      rootEvent$
+        .debug(ev =>
+          console.log(
+            'event',
+            ev,
+            dest.scopeChecker.namespace,
+            dest.scopeChecker.isDirectlyInScope(ev.target as Element),
+          ),
+        )
+        .filter(ev => dest.scopeChecker.isDirectlyInScope(ev.target as Element))
+        .addListener({
+          next: ev => {
+            dest.subject.shamefullySendNext(ev);
+          },
+        });
+    }
+    for (let idx in tree) {
+      this.resetEventListeners(tree[idx] as ListenerTree);
+    }
+  }
 
   /*private bubble(rawEvent: Event): void {
     const origin = this.origin;
