@@ -24,7 +24,7 @@ interface ListenerTree {
   [scope: string]: Destination | ListenerTree;
 }
 
-const listenerSymbol = Symbol('listener');
+const listenerSymbol = '__Cycletest__'; //Symbol('listener');
 
 /**
  * Manages "Event delegation", by connecting an origin with multiple
@@ -46,17 +46,14 @@ export class EventDelegator {
   ) {
     this.eventStreamByType = new Map<string, Stream<Event>>();
     this.listeners = {};
-    rootElement$
-      .drop(1)
-      .take(1)
-      .addListener({
-        next: el => {
-          if (this.origin !== el) {
-            this.origin = el;
-            this.resetEventListeners(this.listeners);
-          }
-        },
-      });
+    rootElement$.addListener({
+      next: el => {
+        if (this.origin !== el) {
+          this.origin = el;
+          this.resetEventListeners(this.listeners);
+        }
+      },
+    });
   }
 
   public addEventListener(
@@ -68,23 +65,14 @@ export class EventDelegator {
     const subject = xs.never();
     const scopeChecker = new ScopeChecker(namespace, this.isolateModule);
 
-    this.insertListener(subject, scopeChecker, eventType, useCapture, options);
-    let rootEvent$ = this.eventStreamByType.get(eventType); //TODO: Non-bubbleing events
-    if (rootEvent$ === undefined && this.origin !== undefined) {
-      rootEvent$ = fromEvent(this.origin, eventType, useCapture, options);
-      this.eventStreamByType.set(eventType, rootEvent$);
-    }
-    if (rootEvent$ !== undefined) {
-      rootEvent$
-        .filter(ev =>
-          scopeChecker.isDirectlyInScope(ev.currentTarget as Element),
-        )
-        .addListener({
-          next: ev => {
-            subject.shamefullySendNext(ev);
-          },
-        });
-    }
+    let dest = this.insertListener(
+      subject,
+      scopeChecker,
+      eventType,
+      useCapture,
+      options,
+    );
+    this.setupSubject(dest);
 
     return subject;
   }
@@ -95,7 +83,7 @@ export class EventDelegator {
     eventType: string,
     useCapture: boolean,
     options: PreventDefaultOpt,
-  ): void {
+  ): Destination {
     let curr = this.listeners;
     for (let i = 0; i < scopeChecker.namespace.length; i++) {
       const n = scopeChecker.namespace[i];
@@ -103,48 +91,57 @@ export class EventDelegator {
         continue;
       }
       curr[n.scope] = (curr[n.scope] || {}) as ListenerTree;
+      curr = curr[n.scope] as ListenerTree;
     }
-    curr[listenerSymbol] = {
+    let destination = {
       eventType,
       useCapture,
       options,
       scopeChecker,
       subject,
     };
+    curr[listenerSymbol] = destination;
+    return destination;
   }
 
   private resetEventListeners(tree: ListenerTree): void {
     const listener = tree[listenerSymbol];
     if (listener !== undefined) {
       let dest = listener as Destination;
-      let rootEvent$ = this.eventStreamByType.get(dest.eventType);
-      if (rootEvent$ === undefined) {
-        rootEvent$ = fromEvent(
-          this.origin,
-          dest.eventType,
-          dest.useCapture,
-          dest.options,
-        );
-        this.eventStreamByType.set(dest.eventType, rootEvent$);
-      }
+      this.setupSubject(dest);
+    }
+    for (let idx in tree) {
+      this.resetEventListeners(tree[idx] as ListenerTree);
+    }
+  }
+
+  private setupSubject(dest: Destination): void {
+    let rootEvent$ = this.eventStreamByType.get(dest.eventType); //TODO: Non-bubbling events
+
+    if (rootEvent$ === undefined && this.origin !== undefined) {
+      rootEvent$ = fromEvent(
+        this.origin,
+        dest.eventType,
+        dest.useCapture,
+        dest.options,
+      );
+      this.eventStreamByType.set(dest.eventType, rootEvent$);
+    }
+    if (rootEvent$ !== undefined) {
       rootEvent$
-        .debug(ev =>
-          console.log(
-            'event',
-            ev,
-            dest.scopeChecker.namespace,
-            dest.scopeChecker.isDirectlyInScope(ev.target as Element),
-          ),
-        )
         .filter(ev => dest.scopeChecker.isDirectlyInScope(ev.target as Element))
+        .filter(ev => {
+          const selector = getSelectors(dest.scopeChecker.namespace);
+          if (!selector) {
+            return true;
+          }
+          return (ev.target as Element).matches(selector);
+        })
         .addListener({
           next: ev => {
             dest.subject.shamefullySendNext(ev);
           },
         });
-    }
-    for (let idx in tree) {
-      this.resetEventListeners(tree[idx] as ListenerTree);
     }
   }
 

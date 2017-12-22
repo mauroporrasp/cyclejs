@@ -3,9 +3,12 @@ import {Scope} from './isolate';
 import {isEqualNamespace} from './utils';
 
 export class ScopeChecker {
-  public namespace: Array<Scope>;
-  constructor(_namespace: Array<Scope>, private isolateModule: IsolateModule) {
-    this.namespace = _namespace.filter(n => n.type !== 'selector');
+  private _namespace: Array<Scope>;
+  constructor(
+    public readonly namespace: Array<Scope>,
+    private isolateModule: IsolateModule,
+  ) {
+    this._namespace = namespace.filter(n => n.type !== 'selector');
   }
 
   /**
@@ -18,15 +21,15 @@ export class ScopeChecker {
     const namespace = this.isolateModule.getNamespace(leaf);
 
     if (
-      this.namespace.length > namespace.length ||
+      this._namespace.length > namespace.length ||
       !isEqualNamespace(
-        this.namespace,
-        namespace.slice(0, this.namespace.length),
+        this._namespace,
+        namespace.slice(0, this._namespace.length),
       )
     ) {
       return false;
     }
-    for (let i = this.namespace.length; i < namespace.length; i++) {
+    for (let i = this._namespace.length; i < namespace.length; i++) {
       if (namespace[i].type === 'total') {
         return false;
       }

@@ -504,11 +504,13 @@ describe('isolation', function() {
       const {isolateSource, isolateSink} = sources.DOM;
 
       const islandDOMSource = isolateSource(sources.DOM, '.island');
-      const click$ = islandDOMSource.select('.foo').events('click');
+      const monalisaClick$ = islandDOMSource.select('.foo').events('click');
       const islandDOMSink$ = isolateSink(
         xs.of(span('.foo.monalisa', 'Monalisa')),
-        'island',
+        '.island',
       );
+
+      const click$ = sources.DOM.select('.foo').events('click');
 
       const frameDOMSource = isolateSource(sources.DOM, 'myFrame');
       const frame = Frame({DOM: frameDOMSource, content$: islandDOMSink$});
@@ -517,7 +519,8 @@ describe('isolation', function() {
       return {
         DOM: outerVTree$,
         frameClick: frame.click$,
-        monalisaClick: click$,
+        monalisaClick: monalisaClick$,
+        click: click$,
       };
     }
 
@@ -525,57 +528,72 @@ describe('isolation', function() {
       DOM: makeDOMDriver(createRenderTarget()),
       frameClick: sink => {},
       monalisaClick: sink => {},
+      click: sink => {},
     });
     let dispose: any;
 
-    const frameClick$ = sinks.frameClick
-      .map(ev => ({
-        type: ev.type,
-        tagName: (ev.target as HTMLElement).tagName,
-      }))
-      .debug('frameClick');
+    const frameClick$ = sinks.frameClick.map(ev => ({
+      type: ev.type,
+      tagName: (ev.target as HTMLElement).tagName,
+    }));
 
-    const monalisaClick$ = sinks.monalisaClick
-      .map(ev => ({
-        type: ev.type,
-        tagName: (ev.target as HTMLElement).tagName,
-      }))
-      .debug('monalisaClick');
+    const monalisaClick$ = sinks.monalisaClick.map(ev => ({
+      type: ev.type,
+      tagName: (ev.target as HTMLElement).tagName,
+    }));
+
+    const grandparentClick$ = sinks.click.map(ev => ({
+      type: ev.type,
+      tagName: (ev.target as HTMLElement).tagName,
+    }));
 
     // Stop the propagtion of the first click
     sinks.monalisaClick.take(1).addListener({
       next: (ev: Event) => ev.stopPropagation(),
     });
 
-    // The frame should be notified about 2 clicks:
-    //  1. the second click on monalisa (whose propagation has not stopped)
-    //  2. the only click on the frame itself
-    const expected = [
-      {type: 'click', tagName: 'SPAN'},
-      {type: 'click', tagName: 'H4'},
-    ];
-    frameClick$.take(2).addListener({
+    let totalClickHandlersCalled = 0;
+    let frameClicked = false;
+    frameClick$.debug('frameClick').addListener({
       next: event => {
-        const e = expected.shift() as any;
-        assert.strictEqual(event.type, e.type);
-        assert.strictEqual(event.tagName, e.tagName);
-        if (expected.length === 0) {
-          dispose();
-          done();
-        }
+        assert.strictEqual(frameClicked, false);
+        assert.strictEqual(event.type, 'click');
+        assert.strictEqual(event.tagName, 'H4');
+        frameClicked = true;
+        totalClickHandlersCalled++;
       },
     });
 
     // Monalisa should receive two clicks
-    const otherExpected = [
-      {type: 'click', tagName: 'SPAN'},
-      {type: 'click', tagName: 'SPAN'},
-    ];
-    monalisaClick$.take(2).addListener({
+    let monalisaClicked = 0;
+    monalisaClick$.debug('monalisaClick').addListener({
       next: event => {
-        const e = otherExpected.shift() as any;
-        assert.strictEqual(event.type, e.type);
-        assert.strictEqual(event.tagName, e.tagName);
+        assert.strictEqual(monalisaClicked < 2, true);
+        assert.strictEqual(event.type, 'click');
+        assert.strictEqual(event.tagName, 'SPAN');
+        monalisaClicked++;
+        totalClickHandlersCalled++;
+      },
+    });
+
+    // The grandparent should receive sibling isolated events
+    // from the monalisa even though it is passed into the
+    // total isolated Frame
+    let grandparentClicked = false;
+    grandparentClick$.debug('grandparentClick').addListener({
+      next: event => {
+        assert.strictEqual(event.type, 'click');
+        assert.strictEqual(event.tagName, 'SPAN');
+        assert.strictEqual(grandparentClicked, false);
+        grandparentClicked = true;
+        totalClickHandlersCalled++;
+        assert.doesNotThrow(() => {
+          setTimeout(() => {
+            assert.strictEqual(totalClickHandlersCalled, 4);
+            dispose();
+            done();
+          }, 10);
+        });
       },
     });
 
@@ -597,9 +615,9 @@ describe('isolation', function() {
           assert.strictEqual(frameFoo.tagName, 'H4');
           assert.strictEqual(monalisaFoo.tagName, 'SPAN');
           assert.doesNotThrow(() => {
-            setTimeout(() => monalisaFoo.click());
-            setTimeout(() => monalisaFoo.click());
             setTimeout(() => frameFoo.click(), 0);
+            setTimeout(() => monalisaFoo.click());
+            setTimeout(() => monalisaFoo.click());
           });
         },
       });
