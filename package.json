@@ -1,4 +1,6 @@
 {
+    "name": "@cycle",
+
   "private": true,
   "license": "MIT",
   "dependencies": {},
